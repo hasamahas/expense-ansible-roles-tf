@@ -1,0 +1,6 @@
+login_user: root
+login_host: db-dev.hasamahas.online
+login_password: ExpenseApp1
+DB_HOST: db-dev.hasamahas.online
+BACKEND_API_URL: backend.app-dev.hasamahas.online
+nexus_url: nexus.hasamahas.online:8081

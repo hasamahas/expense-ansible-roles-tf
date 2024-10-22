@@ -1,0 +1,8 @@
+- name: Congifure DB server
+  hosts: db
+  become: yes
+  vars_files:
+  - credentials.yaml
+  roles:
+  - db
+  

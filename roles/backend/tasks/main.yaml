@@ -1,0 +1,55 @@
+- name: disable default nodejs
+  ansible.builtin.command: dnf module disable nodejs -y
+
+- name: enable nodejs:20
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+
+- name: Install nodejs
+  ansible.builtin.dnf:
+    name: "{{item}}"
+    state: latest
+  loop:
+  - mysql
+  - nodejs
+
+- name: create expense user
+  ansible.builtin.user:
+    name: expense
+
+- name: run app pre-requisites
+  tags:
+  - deployment
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: app-pre-req
+
+- name: install npm dependancies
+  tags:
+  - deployment
+  ansible.builtin.command: npm install
+  args:
+    chdir: /app   # we are telling ansible that run change dir before run npm install
+
+- name: copy backend service file
+  ansible.builtin.template:
+    src: backend.service.j2
+    dest: /etc/systemd/system/backend.service
+  notify:
+  - daemon reload
+  - start and enable backend service
+
+- name: install python mysql dependancies
+  ansible.builtin.pip:
+    name:
+    - PyMySQL
+    - cryptography
+    executable: pip3.9  # it changes as per ansible python version
+
+- name: import data into mysql
+  community.mysql.mysql_db:
+    login_user: "{{login_user}}"
+    login_password: "{{login_password}}"
+    login_host: "{{login_host}}"
+    target: /app/schema/backend.sql
+    state: import
+    name: all
